@@ -1,3 +1,57 @@
+<?php
+
+function get_CURL($url){
+  $curl = curl_init();  // menyimpan variabel curl yg berisi inisiasi fungsi curl
+                      // curl bisa digunakan untuk GET, POST, PUT
+
+// buat opsi untuk curl nya
+// link url di dapat dari tahapan postman sebelum nya
+// opsi ini bisa banyak , tergantung kebutuhan
+curl_setopt($curl, CURLOPT_URL, $url);
+
+// kita ingin ubah data menjadi text
+// kita tambah true(atau "1"), jika ingin kembaliannya text
+curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+
+// terakhir kita eksekusi variabel curl nya
+$result = curl_exec($curl); // apapun kembalian server akan di simpan di variabel result
+
+// terakhir kita close curl nya
+curl_close();
+
+// terakhir sekali kita decode resultnya
+// jika ingin menjadi array, kita tambahkan true, jika tidak maka kembaliannya jadi objek
+return json_decode($result, true);
+}
+
+//var_dump($result);
+// file get_content juga sebenarnya bisa kita gunakan
+// tapi kali ini kita gunakan curl
+
+
+// sekarang kita tarik jsonya
+// kita ambil profile picture
+
+//result
+$result = get_CURL('https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&id=UCYlW3nHiLMUXabflEoO_SQA&key=AIzaSyAWo7ERMMYjDYH8jbfW5tJ_pEOvpu_TNFs'); 
+
+
+
+$youtubeProfilePic = $result['items'][0]['snippet']['thumbnails']['medium']['url'];
+$chanelName = $result['items'][0]['snippet']['title'];
+$jmlSubs = $result['items'][0]['statistics']['subscriberCount'];
+
+
+// latest video
+$urlLatestVideo = get_CURL('https://www.googleapis.com/youtube/v3/search?key=AIzaSyAWo7ERMMYjDYH8jbfW5tJ_pEOvpu_TNFs&channelId=UCYlW3nHiLMUXabflEoO_SQA&maxResults=1&order=date&part=snippet');
+
+
+$latestVideoId = $urlLatestVideo['items'][0]['id']['videoId'];
+
+?>
+
+
+
 <!doctype html>
 <html lang="en">
   <head>
@@ -41,7 +95,7 @@
     <div class="jumbotron" id="home">
       <div class="container">
         <div class="text-center">
-          <img src="img/profile1.png" class="rounded-circle img-thumbnail">
+          <img src="<?= $youtubeProfilePic; ?>" class="rounded-circle img-thumbnail">
           <h1 class="display-4">Sandhika Galih</h1>
           <h3 class="lead">Lecturer | Programmer | Youtuber</h3>
         </div>
@@ -82,17 +136,20 @@
           <div class="col-md-5">
             <div class="row">
               <div class="col-md-4">
-                <img src="img/profile1.png" width="200px" class="rounded-circle img-thumbnail">
+                <img src="<?= $youtubeProfilePic; ?>" width="200px" class="rounded-circle img-thumbnail">
               </div>
               <div class="col-md-8">
-                <h5>Puput Budi </h5>
-                <h5>1000 Subscribers</h5>
+                <h5><?= $chanelName ?></h5>
+                <h5><?= $jmlSubs ?> Subscribers</h5>
+                <div class="g-ytsubscribe" data-channelid="UCYlW3nHiLMUXabflEoO_SQA" data-layout="default" data-count="default">
               </div>
+              </div>
+              
               </div>
             <div class="row mt-3 pb-3">
               <div class="col">
                 <div class="embed-responsive embed-responsive-16by9">
-                  <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/8HFoNYlRoPY?rel=0" allowfullscreen></iframe>
+                  <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/<?= $latestVideoId?>?rel=0" allowfullscreen></iframe>
                 </div>
               </div>
             </div>
@@ -275,5 +332,7 @@
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js" integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js" integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm" crossorigin="anonymous"></script>
+    <script src="https://apis.google.com/js/platform.js"></script>
+    
   </body>
 </html>
